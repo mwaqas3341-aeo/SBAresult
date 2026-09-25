@@ -1,0 +1,63 @@
+{% extends "base.html" %}
+{% block content %}
+
+<section class="card">
+  <h2>Upload the Log Sheet</h2>
+  <p class="muted">
+    Upload an <strong>.xlsx</strong> or <strong>.xlsm</strong> file containing a
+    <strong>Log Sheet</strong> with one row per student. A result card PDF is
+    generated for every row &mdash; a single PDF if there's one student, or a
+    ZIP file (sorted into Class / Section folders) if there are several.
+  </p>
+
+  <form action="{{ url_for('generate_route') }}" method="post" enctype="multipart/form-data" class="upload-form">
+    <label class="dropzone" for="file-input">
+      <input id="file-input" type="file" name="logsheet" accept=".xlsx,.xlsm" required>
+      <span class="dz-text">Click to choose a file, or drag it here</span>
+      <span class="dz-filename" id="dz-filename"></span>
+    </label>
+    <button type="submit" class="btn">Generate Result Card(s)</button>
+  </form>
+</section>
+
+<section class="card">
+  <h2>Expected columns in the Log Sheet</h2>
+  <p class="muted">Header row on row 1; one student per row below it.</p>
+  <div class="table-scroll">
+    <table class="ref-table">
+      <thead>
+        <tr>
+          <th>School Name</th><th>Class</th><th>Roll No.</th><th>B.Form No.</th>
+          <th>Student Name</th><th>Father Name</th><th>Date Of Birth</th><th>Section</th>
+          <th>English</th><th>Urdu</th><th>Mathematics</th>
+          <th>General Knowledge / General Science</th>
+          <th>Social Studies / History / Geography</th>
+          <th>Islamiat / Ethics</th><th>Holy Quran</th><th>Computer Education</th><th>Other Subject</th>
+        </tr>
+      </thead>
+    </table>
+  </div>
+</section>
+
+<section class="card">
+  <h2>Grading formula</h2>
+  <table class="grade-table">
+    <tr><th>Grade</th><th>Percentage</th></tr>
+    <tr><td>A+</td><td>Above 80%</td></tr>
+    <tr><td>A</td><td>70% &ndash; 79%</td></tr>
+    <tr><td>B</td><td>60% &ndash; 69%</td></tr>
+    <tr><td>C</td><td>50% &ndash; 59%</td></tr>
+    <tr><td>D</td><td>40% &ndash; 49%</td></tr>
+    <tr><td>E</td><td>33% &ndash; 39%</td></tr>
+    <tr><td>F</td><td>Below 33%</td></tr>
+  </table>
+</section>
+
+<script>
+  const input = document.getElementById('file-input');
+  const label = document.getElementById('dz-filename');
+  input.addEventListener('change', () => {
+    label.textContent = input.files.length ? input.files[0].name : '';
+  });
+</script>
+{% endblock %}
