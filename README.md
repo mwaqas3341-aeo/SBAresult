@@ -99,4 +99,33 @@ engine/generator.py       Parsing, template stamping, PDF/ZIP generation
 assets/master_template.xlsx   The untouched Result Card + Log Sheet template
 fonts/                    Barlow Semi Condensed (template font, bundled for Docker)
 templates/, static/       Upload page HTML/CSS
+original_template/        The original Excel/VBA workbook, kept for reference
 ```
+
+## Using this as a template for another school
+
+This repo is meant to be copied via GitHub's **"Use this template"** button
+(if you don't see that button, ask the repo owner to enable it under
+*Settings → General → Template repository*) so any school can stand up
+their own copy.
+
+**If your result card uses the exact same official SBA layout** as
+`original_template/Auto_Result_Card.xlsm`, you don't need to change
+anything — just deploy the copy and start uploading your own Log Sheets.
+
+**If your school's card design is different**, swap in your own workbook:
+
+1. Replace `assets/master_template.xlsx` with your own template, built the
+   same way the original was: a `Result Card` sheet whose cells/formulas
+   read from a staging row, plus whatever helper sheet(s) your grading
+   formulas depend on.
+2. In `engine/generator.py`, update:
+   - `STAGING_COLUMNS` and the `A41:Q41`-style cell range in `_render_pdf`
+     to match your staging row and its columns.
+   - `HEADER_SYNONYMS` to match your Log Sheet's column headers.
+3. Re-run the local test in the **Local development** section above with a
+   sample Log Sheet to confirm the PDFs render correctly before deploying.
+
+The grading logic itself never needs to change in Python — it lives
+entirely in your template's own formulas, so whatever grading scale your
+school uses is whatever your spreadsheet already calculates.
