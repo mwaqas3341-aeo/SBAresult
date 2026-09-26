@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SBA Result Card Generator</title>
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+  <header class="topbar">
+    <div class="wrap">
+      <span class="badge">SBA</span>
+      <h1>Result Card Generator</h1>
+    </div>
+  </header>
+
+  <main class="wrap">
+    <section class="card">
+      <h2>Upload the Log Sheet</h2>
+      <p class="muted">
+        Everything runs in your browser &mdash; nothing is uploaded to any
+        server. Choose a <strong>.xlsx</strong> or <strong>.xlsm</strong> file
+        with a <strong>Log Sheet</strong> (one row per student). A result
+        card PDF is generated per student: a single PDF if there's one, or a
+        ZIP file (sorted into Class / Section folders) for several.
+      </p>
+
+      <div class="upload-form">
+        <label class="dropzone" for="file-input">
+          <input id="file-input" type="file" accept=".xlsx,.xlsm">
+          <span class="dz-text" id="dz-text">Click to choose a file, or drag it here</span>
+        </label>
+        <button id="generate-btn" class="btn" disabled>Generate Result Card(s)</button>
+        <div id="status" class="status" hidden></div>
+        <div id="progress-wrap" class="progress-wrap" hidden>
+          <div id="progress-bar" class="progress-bar"></div>
+        </div>
+      </div>
+    </section>
+
+    <section class="card">
+      <h2>Expected columns in the Log Sheet</h2>
+      <p class="muted">Header row on row 1; one student per row below it.</p>
+      <div class="table-scroll">
+        <table class="ref-table">
+          <thead>
+            <tr>
+              <th>School Name</th><th>Class</th><th>Roll No.</th><th>B.Form No.</th>
+              <th>Student Name</th><th>Father Name</th><th>Date Of Birth</th><th>Section</th>
+              <th>English</th><th>Urdu</th><th>Mathematics</th>
+              <th>General Knowledge / General Science</th>
+              <th>Social Studies / History / Geography</th>
+              <th>Islamiat / Ethics</th><th>Holy Quran</th><th>Computer Education</th><th>Other Subject</th>
+            </tr>
+          </thead>
+        </table>
+      </div>
+    </section>
+
+    <section class="card">
+      <h2>Grading formula</h2>
+      <table class="grade-table">
+        <tr><th>Grade</th><th>Percentage</th></tr>
+        <tr><td>A+</td><td>Above 80%</td></tr>
+        <tr><td>A</td><td>70% &ndash; 79%</td></tr>
+        <tr><td>B</td><td>60% &ndash; 69%</td></tr>
+        <tr><td>C</td><td>50% &ndash; 59%</td></tr>
+        <tr><td>D</td><td>40% &ndash; 49%</td></tr>
+        <tr><td>E</td><td>33% &ndash; 39%</td></tr>
+        <tr><td>F</td><td>Below 33%</td></tr>
+      </table>
+    </section>
+  </main>
+
+  <footer class="wrap footer">
+    <p>School Based Assessment &mdash; runs entirely in your browser, hosted free on GitHub Pages.</p>
+  </footer>
+
+  <!-- Off-screen render target: one card is built here per student, then rasterized to PDF -->
+  <div id="render-root" aria-hidden="true"></div>
+  <template id="card-template">
+    <div class="rc-card">
+      <div class="rc-banner">
+        <img src="assets/header-banner.jpg" alt="">
+        <h1 class="rc-title">REPORT CARD SCHOOL BASED ASSESSMENT (SBA) 2025</h1>
+      </div>
+
+      <table class="rc-info">
+        <tr>
+          <td class="rc-label" style="width:16%">SCHOOL NAME</td>
+          <td class="rc-value" data-field="school" style="width:34%"></td>
+          <td class="rc-label" style="width:12%">DISTRICT</td>
+          <td class="rc-value" data-field="district" style="width:38%"></td>
+        </tr>
+        <tr>
+          <td class="rc-label">STUDENT NAME:</td>
+          <td class="rc-value" data-field="name"></td>
+          <td class="rc-label">FATHER NAME:</td>
+          <td class="rc-value" data-field="father"></td>
+        </tr>
+        <tr>
+          <td class="rc-label">B.FORM NO.</td>
+          <td class="rc-value" data-field="bform"></td>
+          <td class="rc-label">CLASS:</td>
+          <td class="rc-value rc-inline"><span data-field="class"></span>
+            <span class="rc-label rc-inline-label">ROLL NO.</span>
+            <span class="rc-value-inline" data-field="roll"></span>
+          </td>
+        </tr>
+        <tr>
+          <td class="rc-label">SECTION</td>
+          <td class="rc-value" data-field="section"></td>
+          <td class="rc-label"></td>
+          <td class="rc-value"></td>
+        </tr>
+        <tr>
+          <td class="rc-label">D.O.B</td>
+          <td class="rc-value" data-field="dob"></td>
+          <td class="rc-label">IN WORDS</td>
+          <td class="rc-value" data-field="dobWords"></td>
+        </tr>
+      </table>
+
+      <div class="rc-two-col">
+        <div class="rc-subjects">
+          <div class="rc-section-header">PERFORMANCE IN SUBJECTS</div>
+          <table class="rc-table">
+            <thead>
+              <tr><th>SR NO.</th><th>SUBJECTS</th><th>TOTAL MARKS</th><th>OBTAINED MARKS</th><th>GRADES</th></tr>
+            </thead>
+            <tbody data-field="subjectRows"></tbody>
+            <tfoot>
+              <tr class="rc-grand-total">
+                <td colspan="2">GRAND TOTAL</td>
+                <td data-field="grandTotalMax"></td>
+                <td data-field="grandTotalObtained"></td>
+                <td data-field="grandTotalGrade"></td>
+              </tr>
+            </tfoot>
+          </table>
+        </div>
+
+        <div class="rc-extra">
+          <div class="rc-section-header">PERFORMANCE IN EXTRACURRICULAR ACTIVITIES</div>
+          <table class="rc-table">
+            <thead>
+              <tr><th>NATURE</th><th>VERY GOOD</th><th>GOOD</th><th>SCOPE OF IMPROVEMENT</th></tr>
+            </thead>
+            <tbody>
+              <tr><td>PARTICIPATE IN TEACHING ACTIVITIES</td><td></td><td></td><td></td></tr>
+              <tr><td>REGULARITY OF HOMEWORK</td><td></td><td></td><td></td></tr>
+              <tr><td>DISCIPLINE</td><td></td><td></td><td></td></tr>
+              <tr><td>PARTICIPATE IN SPORTS</td><td></td><td></td><td></td></tr>
+              <tr><td>JOIN BAZM ADAB</td><td></td><td></td><td></td></tr>
+              <tr><td>FROM TEACHERS AND COLLEAGUES</td><td></td><td></td><td></td></tr>
+            </tbody>
+            <tfoot>
+              <tr class="rc-attendance">
+                <td>TOTAL DAYS</td><td></td>
+                <td>ATTENDANCE</td><td></td>
+              </tr>
+            </tfoot>
+          </table>
+        </div>
+      </div>
+
+      <div class="rc-two-col rc-remarks-row">
+        <div class="rc-remarks">
+          <div class="rc-remarks-label">TEACHER REMARKS:</div>
+          <div class="rc-remarks-lines"><span></span><span></span><span></span><span></span></div>
+        </div>
+        <div class="rc-grading">
+          <div class="rc-grading-header">GRADING FORMULA</div>
+          <table class="rc-grading-table">
+            <tr><td>A+</td><td>ABOVE 80%</td></tr>
+            <tr><td>A</td><td>70 - 79 %</td></tr>
+            <tr><td>B</td><td>60 - 69 %</td></tr>
+            <tr><td>C</td><td>50 - 59 %</td></tr>
+            <tr><td>D</td><td>40 - 49 %</td></tr>
+            <tr><td>E</td><td>33 - 39 %</td></tr>
+          </table>
+        </div>
+      </div>
+
+      <div class="rc-signatures">
+        <div>SIGNATURE CLASS TEACHER</div>
+        <div>SIGNATURE HEAD MASTER/MISTRESS</div>
+      </div>
+    </div>
+  </template>
+
+  <script src="js/vendor/xlsx.full.min.js"></script>
+  <script src="js/vendor/jszip.min.js"></script>
+  <script src="js/vendor/html2canvas.min.js"></script>
+  <script src="js/vendor/jspdf.umd.min.js"></script>
+  <script src="js/grading.js"></script>
+  <script src="js/parse.js"></script>
+  <script src="js/render.js"></script>
+  <script src="js/app.js"></script>
+</body>
+</html>

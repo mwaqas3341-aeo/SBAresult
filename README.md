@@ -1,32 +1,43 @@
 # SBA Result Card Generator
 
-A small web app for Govt. school **School Based Assessment (SBA)** result
-cards. Upload a Log Sheet (Excel), and it generates one PDF result card per
+A web app for Govt. school **School Based Assessment (SBA)** result cards.
+Upload a Log Sheet (Excel), and it generates one PDF result card per
 student — a single PDF for one student, or a ZIP (sorted into
 `Class/Section/` folders) for several.
 
-The result card **layout, formulas, and grading logic are the original
-template, untouched** — this app just automates what the original Excel
-macro did (stamp a student's row into the template, let the template's own
-formulas calculate grades, export as PDF), so there is no risk of the
-printed card ever drifting from the approved format.
+**Live, ready to use — no hosting, no server, no cost:** the app in
+[`docs/`](docs/) runs **entirely in your browser** and is served for free
+by GitHub Pages straight from this repo. Enable it once under
+**Settings → Pages → Deploy from a branch → `main` / `docs`**, and your
+copy is live at `https://<you>.github.io/<repo>/`.
 
-## How it works
+## How it works (docs/ — the GitHub Pages app)
 
-1. `assets/master_template.xlsx` is the original `Result Card` +
-   `Log Sheet` workbook (VBA stripped — it's not needed since the app does
-   the work server-side), with the staging row blanked out.
-2. For each student row found in the **uploaded** file's Log Sheet, the app:
-   - copies that row's 17 fields into `Result Card!A41:Q41` of a fresh copy
-     of the template (same cells the original VBA macro used),
-   - hides the `Log Sheet` tab so only the Result Card exports,
-   - converts the workbook to PDF with LibreOffice headless, which
-     recalculates every formula (subject grades, grand total, overall
-     grade) using the template's own formulas.
-3. One PDF → returned directly. Multiple PDFs → zipped into
-   `Class/Section/StudentName_Class_Roll.pdf`.
+Nothing is uploaded anywhere. When you choose a Log Sheet file, the page:
 
-### Grading formula (from the template, unchanged)
+1. Parses it in-browser with [SheetJS](https://sheetjs.com/) — finds the
+   `Log Sheet` tab, maps its columns, and reads one row per student.
+2. Fills an HTML/CSS recreation of the original Result Card (same text,
+   layout, colors, grading table, and the official Punjab government
+   banner image) with that student's data, and computes each subject's
+   grade with the **same percentage bands as the original template's
+   formulas**.
+3. Rasterizes that card to a crisp PDF page with `html2canvas` + `jsPDF`.
+4. One student → downloads a single PDF. Several → zips them (via
+   `JSZip`) into `Class/Section/StudentName_Class_Roll.pdf` and downloads
+   the ZIP.
+
+All four libraries (`xlsx`, `jszip`, `html2canvas`, `jspdf`) are vendored
+in `docs/js/vendor/` — the page loads no external CDN at runtime, so it
+keeps working even if a CDN is down or blocked.
+
+**Note:** this recreates the card's appearance in HTML/CSS rather than
+reusing the original Excel formulas directly, so it is a very close but
+not pixel-identical match to the source workbook. If you need the literal
+original template rendered (formulas and formatting untouched, byte-for-byte
+the same file), use the Flask/LibreOffice version below instead.
+
+### Grading formula (same bands as the original template)
 
 | Grade | Percentage    |
 |-------|---------------|
@@ -59,10 +70,64 @@ both headed "Section" (one used on the printed card, one — column R — that
 in the sample data contained stray test values). This app uses the
 **first** "Section" column (the one that also appears on the printed
 card) for both the card and the Class/Section folder grouping in the ZIP.
-If your school actually wants folder-grouping to use a *different* column,
-that's a one-line change in `engine/generator.py` (`_map_headers`).
 
-## Local development
+## Trying it locally
+
+```bash
+cd docs
+python3 -m http.server 8080
+# open http://localhost:8080
+```
+
+## Using this as a template for another school
+
+This repo is meant to be copied via GitHub's **"Use this template"** button
+(if you don't see that button, ask the repo owner to enable it under
+*Settings → General → Template repository*), so any school can stand up
+their own copy, enable Pages on it, and be live in a couple of minutes.
+
+**If your result card uses the exact same official SBA layout** as
+`original_template/Auto_Result_Card.xlsm`, you don't need to change
+anything — enable Pages and start uploading your own Log Sheets.
+
+**If your school's card design is different**, the parts to change are:
+
+- `docs/index.html` — the `<template id="card-template">` markup (the
+  card's structure/labels) and the static `LAYYAH` district text.
+- `docs/css/style.css` — the `.rc-*` rules (colors, fonts, sizing).
+- `docs/js/parse.js` — `HEADER_SYNONYMS` (your Log Sheet's column names)
+  and `SUBJECT_DEFS` (your subjects and their max marks).
+- `docs/assets/header-banner.jpg` — swap in your own header image.
+
+The grading bands live in `docs/js/grading.js` if your school uses a
+different scale.
+
+---
+
+## Alternative: self-hosted Flask + LibreOffice version
+
+The root of this repo also contains a second implementation that reuses
+the **actual original Excel file** (formulas and all) via LibreOffice
+headless, for anyone who wants byte-for-byte fidelity to the source
+workbook instead of an HTML recreation. This one needs a server (it's not
+free/static like the Pages app above) — see below.
+
+### How it works
+
+1. `assets/master_template.xlsx` is the original `Result Card` +
+   `Log Sheet` workbook (VBA stripped — it's not needed since the app does
+   the work server-side), with the staging row blanked out.
+2. For each student row found in the **uploaded** file's Log Sheet, the app:
+   - copies that row's 17 fields into `Result Card!A41:Q41` of a fresh copy
+     of the template (same cells the original VBA macro used),
+   - hides the `Log Sheet` tab so only the Result Card exports,
+   - converts the workbook to PDF with LibreOffice headless, which
+     recalculates every formula (subject grades, grand total, overall
+     grade) using the template's own formulas.
+3. One PDF → returned directly. Multiple PDFs → zipped into
+   `Class/Section/StudentName_Class_Roll.pdf`.
+
+### Local development
 
 ```bash
 python3 -m venv .venv && source .venv/bin/activate
@@ -78,7 +143,7 @@ pip install -r requirements.txt
 python app.py   # http://localhost:5000
 ```
 
-## Deployment
+### Deployment
 
 A `Dockerfile` is included — it installs LibreOffice, the Calibri-compatible
 `fonts-crosextra-carlito` package, and bundles the Barlow Semi Condensed
@@ -94,38 +159,21 @@ docker run -p 5000:5000 sba-result-card
 ## Project layout
 
 ```
-app.py                    Flask routes (upload page, /generate)
+docs/                     The GitHub Pages app (client-side, no server)
+  index.html                Upload page + off-screen card template
+  css/style.css              Styles for the page and the result card
+  js/parse.js                Log Sheet parsing (SheetJS)
+  js/grading.js               Grading formula
+  js/render.js                 Card fill-in + PDF rasterization
+  js/app.js                     UI wiring, single/ZIP output
+  js/vendor/                     Vendored xlsx/jszip/html2canvas/jspdf
+  assets/header-banner.jpg        Punjab government header image
+  fonts/                           Barlow Semi Condensed (template font)
+
+app.py                    Flask routes (upload page, /generate) — alternative
 engine/generator.py       Parsing, template stamping, PDF/ZIP generation
 assets/master_template.xlsx   The untouched Result Card + Log Sheet template
 fonts/                    Barlow Semi Condensed (template font, bundled for Docker)
-templates/, static/       Upload page HTML/CSS
+templates/, static/       Upload page HTML/CSS for the Flask version
 original_template/        The original Excel/VBA workbook, kept for reference
 ```
-
-## Using this as a template for another school
-
-This repo is meant to be copied via GitHub's **"Use this template"** button
-(if you don't see that button, ask the repo owner to enable it under
-*Settings → General → Template repository*) so any school can stand up
-their own copy.
-
-**If your result card uses the exact same official SBA layout** as
-`original_template/Auto_Result_Card.xlsm`, you don't need to change
-anything — just deploy the copy and start uploading your own Log Sheets.
-
-**If your school's card design is different**, swap in your own workbook:
-
-1. Replace `assets/master_template.xlsx` with your own template, built the
-   same way the original was: a `Result Card` sheet whose cells/formulas
-   read from a staging row, plus whatever helper sheet(s) your grading
-   formulas depend on.
-2. In `engine/generator.py`, update:
-   - `STAGING_COLUMNS` and the `A41:Q41`-style cell range in `_render_pdf`
-     to match your staging row and its columns.
-   - `HEADER_SYNONYMS` to match your Log Sheet's column headers.
-3. Re-run the local test in the **Local development** section above with a
-   sample Log Sheet to confirm the PDFs render correctly before deploying.
-
-The grading logic itself never needs to change in Python — it lives
-entirely in your template's own formulas, so whatever grading scale your
-school uses is whatever your spreadsheet already calculates.
