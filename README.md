@@ -71,6 +71,28 @@ in the sample data contained stray test values). This app uses the
 **first** "Section" column (the one that also appears on the printed
 card) for both the card and the Class/Section folder grouping in the ZIP.
 
+## Accounts (optional)
+
+Signing in is not required to generate result cards — it only unlocks two
+extra things:
+
+- **Saved settings**: a School Name and District that persist across
+  visits. A signed-in account's saved District overrides the card's
+  default "LAYYAH" text.
+- **History**: a running log of past generations (when, how many
+  students, which class/section, the file name) — nothing about the
+  students themselves is stored, just that metadata.
+
+This is backed by a small Supabase project (auth + two tables:
+`school_profiles`, `generation_history`), locked down with Row Level
+Security so each account can only ever read or write its own rows. The
+site itself is still 100% static on GitHub Pages — Supabase is only
+called from the browser for these two optional features.
+
+**Note:** new accounts need to confirm their email before they can sign
+in (Supabase's default). To skip that during testing, turn off "Confirm
+email" under the project's Authentication → Sign In / Providers settings.
+
 ## Trying it locally
 
 ```bash
