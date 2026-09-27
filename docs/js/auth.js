@@ -39,11 +39,11 @@ function onAuthChange(callback) {
 async function getProfile(userId) {
   const { data, error } = await sb
     .from("school_profiles")
-    .select("school_name, district")
+    .select("school_name, district, is_admin")
     .eq("id", userId)
     .maybeSingle();
   if (error) throw error;
-  return data || { school_name: "", district: "" };
+  return data || { school_name: "", district: "", is_admin: false };
 }
 
 async function saveProfile(userId, { school_name, district }) {
@@ -72,4 +72,25 @@ async function addHistoryEntry(userId, entry) {
   } catch (err) {
     console.warn("Could not save history entry:", err);
   }
+}
+
+// Admin-only (RLS only returns rows across all accounts when the caller's
+// own profile has is_admin = true; anyone else just gets their own row back).
+async function listAllProfiles() {
+  const { data, error } = await sb
+    .from("school_profiles")
+    .select("email, school_name, district, created_at")
+    .order("created_at", { ascending: false });
+  if (error) throw error;
+  return data || [];
+}
+
+async function listAllHistory(limit = 100) {
+  const { data, error } = await sb
+    .from("generation_history")
+    .select("created_at, student_count, class_label, section_label, file_name, user_id")
+    .order("created_at", { ascending: false })
+    .limit(limit);
+  if (error) throw error;
+  return data || [];
 }
