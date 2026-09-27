@@ -60,6 +60,7 @@ async function enterLoggedIn(session) {
   window.currentAccount.session = session;
   loggedOutEl.hidden = true;
   loggedInEl.hidden = false;
+  document.getElementById("app-content").hidden = false;
   accountEmailEl.textContent = session.user.email;
 
   try {
@@ -122,6 +123,7 @@ function enterLoggedOut() {
   loggedOutEl.hidden = false;
   loggedInEl.hidden = true;
   document.getElementById("admin-card").hidden = true;
+  document.getElementById("app-content").hidden = true;
 }
 
 signUpBtn.addEventListener("click", async () => {

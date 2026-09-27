@@ -18,7 +18,7 @@
     <section class="card" id="account-card">
       <div id="account-logged-out">
         <h2>Account</h2>
-        <p class="muted">Sign in to save your school's details and keep a history of past generations. Not required to use the generator below.</p>
+        <p class="muted">Sign in to generate result cards, save your school's details, and keep a history of past generations.</p>
         <div class="account-form">
           <input type="email" id="auth-email" placeholder="Email" autocomplete="email">
           <input type="password" id="auth-password" placeholder="Password" autocomplete="current-password">
@@ -74,67 +74,69 @@
       </div>
     </section>
 
-    <section class="card">
-      <h2>Upload the Log Sheet</h2>
-      <p class="muted">
-        Everything runs in your browser &mdash; nothing is uploaded to any
-        server. Choose a <strong>.xlsx</strong> or <strong>.xlsm</strong> file
-        with a <strong>Log Sheet</strong> (one row per student). A result
-        card PDF is generated per student: a single PDF if there's one, or a
-        ZIP file (sorted into Class / Section folders) for several.
-      </p>
+    <div id="app-content" hidden>
+      <section class="card">
+        <h2>Upload the Log Sheet</h2>
+        <p class="muted">
+          Everything runs in your browser &mdash; nothing is uploaded to any
+          server. Choose a <strong>.xlsx</strong> or <strong>.xlsm</strong> file
+          with a <strong>Log Sheet</strong> (one row per student). A result
+          card PDF is generated per student: a single PDF if there's one, or a
+          ZIP file (sorted into Class / Section folders) for several.
+        </p>
 
-      <p class="muted">
-        Don't have a Log Sheet yet?
-        <a class="download-link" href="templates/Log_Sheet_Template.xlsx" download>Download a blank template &#8595;</a>
-        (correct column headers already in place, plus an Instructions tab)
-      </p>
+        <p class="muted">
+          Don't have a Log Sheet yet?
+          <a class="download-link" href="templates/Log_Sheet_Template.xlsx" download>Download a blank template &#8595;</a>
+          (correct column headers already in place, plus an Instructions tab)
+        </p>
 
-      <div class="upload-form">
-        <label class="dropzone" for="file-input">
-          <input id="file-input" type="file" accept=".xlsx,.xlsm">
-          <span class="dz-text" id="dz-text">Click to choose a file, or drag it here</span>
-        </label>
-        <button id="generate-btn" class="btn" disabled>Generate Result Card(s)</button>
-        <div id="status" class="status" hidden></div>
-        <div id="progress-wrap" class="progress-wrap" hidden>
-          <div id="progress-bar" class="progress-bar"></div>
+        <div class="upload-form">
+          <label class="dropzone" for="file-input">
+            <input id="file-input" type="file" accept=".xlsx,.xlsm">
+            <span class="dz-text" id="dz-text">Click to choose a file, or drag it here</span>
+          </label>
+          <button id="generate-btn" class="btn" disabled>Generate Result Card(s)</button>
+          <div id="status" class="status" hidden></div>
+          <div id="progress-wrap" class="progress-wrap" hidden>
+            <div id="progress-bar" class="progress-bar"></div>
+          </div>
         </div>
-      </div>
-    </section>
+      </section>
 
-    <section class="card">
-      <h2>Expected columns in the Log Sheet</h2>
-      <p class="muted">Header row on row 1; one student per row below it.</p>
-      <div class="table-scroll">
-        <table class="ref-table">
-          <thead>
-            <tr>
-              <th>School Name</th><th>Class</th><th>Roll No.</th><th>B.Form No.</th>
-              <th>Student Name</th><th>Father Name</th><th>Date Of Birth</th><th>Section</th>
-              <th>English</th><th>Urdu</th><th>Mathematics</th>
-              <th>General Knowledge / General Science</th>
-              <th>Social Studies / History / Geography</th>
-              <th>Islamiat / Ethics</th><th>Holy Quran</th><th>Computer Education</th><th>Other Subject</th>
-            </tr>
-          </thead>
+      <section class="card">
+        <h2>Expected columns in the Log Sheet</h2>
+        <p class="muted">Header row on row 1; one student per row below it.</p>
+        <div class="table-scroll">
+          <table class="ref-table">
+            <thead>
+              <tr>
+                <th>School Name</th><th>Class</th><th>Roll No.</th><th>B.Form No.</th>
+                <th>Student Name</th><th>Father Name</th><th>Date Of Birth</th><th>Section</th>
+                <th>English</th><th>Urdu</th><th>Mathematics</th>
+                <th>General Knowledge / General Science</th>
+                <th>Social Studies / History / Geography</th>
+                <th>Islamiat / Ethics</th><th>Holy Quran</th><th>Computer Education</th><th>Other Subject</th>
+              </tr>
+            </thead>
+          </table>
+        </div>
+      </section>
+
+      <section class="card">
+        <h2>Grading formula</h2>
+        <table class="grade-table">
+          <tr><th>Grade</th><th>Percentage</th></tr>
+          <tr><td>A+</td><td>Above 80%</td></tr>
+          <tr><td>A</td><td>70% &ndash; 79%</td></tr>
+          <tr><td>B</td><td>60% &ndash; 69%</td></tr>
+          <tr><td>C</td><td>50% &ndash; 59%</td></tr>
+          <tr><td>D</td><td>40% &ndash; 49%</td></tr>
+          <tr><td>E</td><td>33% &ndash; 39%</td></tr>
+          <tr><td>F</td><td>Below 33%</td></tr>
         </table>
-      </div>
-    </section>
-
-    <section class="card">
-      <h2>Grading formula</h2>
-      <table class="grade-table">
-        <tr><th>Grade</th><th>Percentage</th></tr>
-        <tr><td>A+</td><td>Above 80%</td></tr>
-        <tr><td>A</td><td>70% &ndash; 79%</td></tr>
-        <tr><td>B</td><td>60% &ndash; 69%</td></tr>
-        <tr><td>C</td><td>50% &ndash; 59%</td></tr>
-        <tr><td>D</td><td>40% &ndash; 49%</td></tr>
-        <tr><td>E</td><td>33% &ndash; 39%</td></tr>
-        <tr><td>F</td><td>Below 33%</td></tr>
-      </table>
-    </section>
+      </section>
+    </div>
   </main>
 
   <footer class="wrap footer">
