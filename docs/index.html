@@ -15,6 +15,44 @@
   </header>
 
   <main class="wrap">
+    <section class="card" id="account-card">
+      <div id="account-logged-out">
+        <h2>Account</h2>
+        <p class="muted">Sign in to save your school's details and keep a history of past generations. Not required to use the generator below.</p>
+        <div class="account-form">
+          <input type="email" id="auth-email" placeholder="Email" autocomplete="email">
+          <input type="password" id="auth-password" placeholder="Password" autocomplete="current-password">
+          <div class="account-btn-row">
+            <button id="auth-signin-btn" class="btn btn-secondary">Sign In</button>
+            <button id="auth-signup-btn" class="btn btn-secondary">Sign Up</button>
+          </div>
+          <div id="auth-status" class="status" hidden></div>
+        </div>
+      </div>
+
+      <div id="account-logged-in" hidden>
+        <h2>Account</h2>
+        <p class="muted">Signed in as <strong id="account-email"></strong>. <a href="#" id="auth-signout-btn">Sign out</a></p>
+
+        <div class="account-form">
+          <label class="field-label">School Name (used when saving settings, not on the card)</label>
+          <input type="text" id="profile-school" placeholder="School name">
+          <label class="field-label">District (shown on every generated card)</label>
+          <input type="text" id="profile-district" placeholder="District">
+          <button id="profile-save-btn" class="btn btn-secondary">Save Settings</button>
+          <div id="profile-status" class="status" hidden></div>
+        </div>
+
+        <h3 class="history-heading">Recent generations</h3>
+        <div class="table-scroll">
+          <table class="ref-table" id="history-table">
+            <thead><tr><th>When</th><th>Students</th><th>Class</th><th>Section</th><th>File</th></tr></thead>
+            <tbody id="history-body"><tr><td colspan="5" class="muted">No generations yet.</td></tr></tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
     <section class="card">
       <h2>Upload the Log Sheet</h2>
       <p class="muted">
@@ -199,6 +237,9 @@
   <script src="js/vendor/jszip.min.js"></script>
   <script src="js/vendor/html2canvas.min.js"></script>
   <script src="js/vendor/jspdf.umd.min.js"></script>
+  <script src="js/vendor/supabase.min.js"></script>
+  <script src="js/auth.js"></script>
+  <script src="js/account.js"></script>
   <script src="js/grading.js"></script>
   <script src="js/parse.js"></script>
   <script src="js/render.js"></script>

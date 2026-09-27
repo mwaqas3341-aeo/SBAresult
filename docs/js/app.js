@@ -60,19 +60,24 @@ generateBtn.addEventListener("click", async () => {
     const buffer = await selectedFile.arrayBuffer();
     const workbook = XLSX.read(buffer, { type: "array", cellDates: true });
     const students = extractStudents(workbook);
+    const overrides = {
+      district: window.currentAccount?.profile?.district || undefined,
+    };
 
     showStatus("info", `Found ${students.length} student${students.length > 1 ? "s" : ""}. Generating PDF${students.length > 1 ? "s" : ""}...`);
 
     if (students.length === 1) {
-      const blob = await renderStudentToPdfBlob(template, renderRoot, students[0]);
+      const blob = await renderStudentToPdfBlob(template, renderRoot, students[0], overrides);
       setProgress(100);
-      downloadBlob(blob, studentFilename(students[0]));
+      const filename = studentFilename(students[0]);
+      downloadBlob(blob, filename);
       showStatus("success", "Result card generated.");
+      logHistoryIfSignedIn(students, filename);
     } else {
       const zip = new JSZip();
       for (let i = 0; i < students.length; i++) {
         const student = students[i];
-        const blob = await renderStudentToPdfBlob(template, renderRoot, student);
+        const blob = await renderStudentToPdfBlob(template, renderRoot, student, overrides);
         const path = `${sanitize(student.class)}/${sanitize(student.section)}/${studentFilename(student)}`;
         zip.file(path, blob);
         setProgress(Math.round(((i + 1) / students.length) * 100));
@@ -80,6 +85,7 @@ generateBtn.addEventListener("click", async () => {
       const zipBlob = await zip.generateAsync({ type: "blob" });
       downloadBlob(zipBlob, "Result_Cards.zip");
       showStatus("success", `Generated ${students.length} result cards.`);
+      logHistoryIfSignedIn(students, "Result_Cards.zip");
     }
   } catch (err) {
     console.error(err);
@@ -90,3 +96,18 @@ generateBtn.addEventListener("click", async () => {
     renderRoot.innerHTML = "";
   }
 });
+
+function logHistoryIfSignedIn(students, fileName) {
+  const session = window.currentAccount?.session;
+  if (!session) return;
+  const classes = [...new Set(students.map((s) => String(s.class)))];
+  const sections = [...new Set(students.map((s) => String(s.section)))];
+  addHistoryEntry(session.user.id, {
+    student_count: students.length,
+    class_label: classes.length === 1 ? classes[0] : `${classes.length} classes`,
+    section_label: sections.length === 1 ? sections[0] : `${sections.length} sections`,
+    file_name: fileName,
+  }).then(() => {
+    if (typeof refreshHistory === "function") refreshHistory(session.user.id);
+  });
+}

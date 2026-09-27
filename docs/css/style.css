@@ -90,6 +90,21 @@ main.wrap { padding: 28px 20px 60px; }
 
 .footer { color: var(--muted); font-size: 0.82rem; padding-bottom: 30px; }
 
+/* ---------- Account card ---------- */
+.account-form { display: flex; flex-direction: column; gap: 10px; max-width: 420px; margin-top: 14px; }
+.account-form input[type="email"],
+.account-form input[type="password"],
+.account-form input[type="text"] {
+  padding: 10px 12px; border: 1px solid var(--border); border-radius: 8px; font-size: 0.95rem;
+}
+.field-label { font-size: 0.82rem; color: var(--muted); margin-top: 4px; }
+.account-btn-row { display: flex; gap: 10px; }
+.account-btn-row .btn { margin-top: 0; }
+.btn-secondary { background: #fff; color: var(--green-dark); border: 1px solid var(--green); }
+.btn-secondary:hover:not(:disabled) { background: var(--green-light); }
+#account-logged-in a#auth-signout-btn { color: var(--green-dark); font-weight: 600; }
+.history-heading { margin: 22px 0 6px; font-size: 1rem; color: var(--green-dark); }
+
 /* ---------- Off-screen result card (rasterized to PDF) ---------- */
 #render-root {
   position: fixed;

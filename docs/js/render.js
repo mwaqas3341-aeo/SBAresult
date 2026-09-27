@@ -1,11 +1,11 @@
-function fillCard(container, student) {
+function fillCard(container, student, overrides = {}) {
   const set = (field, text) => {
     const el = container.querySelector(`[data-field="${field}"]`);
     if (el) el.textContent = text;
   };
 
   set("school", student.school);
-  set("district", "LAYYAH");
+  set("district", overrides.district || "LAYYAH");
   set("name", student.name);
   set("father", student.father);
   set("bform", student.bform);
@@ -28,11 +28,11 @@ function fillCard(container, student) {
   set("grandTotalGrade", student.grandTotalGrade);
 }
 
-async function renderStudentToPdfBlob(template, root, student) {
+async function renderStudentToPdfBlob(template, root, student, overrides = {}) {
   const node = template.content.firstElementChild.cloneNode(true);
   root.innerHTML = "";
   root.appendChild(node);
-  fillCard(node, student);
+  fillCard(node, student, overrides);
 
   // Let fonts/images settle before rasterizing.
   if (document.fonts && document.fonts.ready) {
