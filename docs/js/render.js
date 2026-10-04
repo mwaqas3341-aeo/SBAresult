@@ -4,8 +4,14 @@ function fillCard(container, student, overrides = {}) {
     if (el) el.textContent = text;
   };
 
-  set("school", student.school);
+  // Per the account/profile rule: School Name always comes from the signed-in
+  // account's profile, not the uploaded Log Sheet (falls back to the sheet's
+  // value only if no profile override was supplied, e.g. no one is signed in).
+  set("school", overrides.school_name || student.school);
   set("district", overrides.district || "LAYYAH");
+  const headingText = overrides.heading || "REPORT CARD SCHOOL BASED ASSESSMENT (SBA)";
+  const yearText = overrides.year || "";
+  set("heading", yearText ? `${headingText} ${yearText}` : headingText);
   set("name", student.name);
   set("father", student.father);
   set("bform", student.bform);

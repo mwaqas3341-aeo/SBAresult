@@ -121,6 +121,10 @@ function formatDob(v) {
   return { short, words };
 }
 
+function isBlank(v) {
+  return v === undefined || v === null || String(v).trim() === "";
+}
+
 function extractStudents(workbook) {
   const ws = findLogSheet(workbook);
   const { colMap, range } = mapHeaders(ws);
@@ -130,14 +134,25 @@ function extractStudents(workbook) {
     const nameVal = cellValue(ws, r, colMap.name);
     if (!toText(nameVal)) continue; // skip totals/blank rows
 
+    const missingFields = [];
+    const rollVal = cellValue(ws, r, colMap.roll);
+    const classVal = cellValue(ws, r, colMap.class);
+    const fatherVal = cellValue(ws, r, colMap.father);
+    const sectionVal = cellValue(ws, r, colMap.section);
+
+    if (isBlank(fatherVal)) missingFields.push("Father's Name");
+    if (isBlank(rollVal)) missingFields.push("Roll No.");
+    if (isBlank(classVal)) missingFields.push("Class");
+    if (isBlank(sectionVal)) missingFields.push("Section");
+
     const student = {
       school: toText(cellValue(ws, r, colMap.school)),
-      class: toText(cellValue(ws, r, colMap.class)) || "Unknown_Class",
-      roll: toText(cellValue(ws, r, colMap.roll)),
+      class: toText(classVal) || "Unknown_Class",
+      roll: toText(rollVal),
       bform: toText(cellValue(ws, r, colMap.bform)),
       name: toText(nameVal),
-      father: toText(cellValue(ws, r, colMap.father)),
-      section: toText(cellValue(ws, r, colMap.section)) || "Unknown_Section",
+      father: toText(fatherVal),
+      section: toText(sectionVal) || "Unknown_Section",
     };
     const dob = formatDob(cellValue(ws, r, colMap.dob));
     student.dobShort = dob.short;
@@ -145,7 +160,9 @@ function extractStudents(workbook) {
 
     let obtainedTotal = 0, maxTotal = 0;
     student.subjects = SUBJECT_DEFS.map((def) => {
-      const obtained = toNum(cellValue(ws, r, colMap[def.key]));
+      const raw = cellValue(ws, r, colMap[def.key]);
+      if (isBlank(raw)) missingFields.push(`${def.label} Marks`);
+      const obtained = toNum(raw);
       obtainedTotal += obtained;
       maxTotal += def.max;
       return { label: def.label, max: def.max, obtained, grade: gradeForMarks(obtained, def.max) };
@@ -153,6 +170,7 @@ function extractStudents(workbook) {
     student.grandTotalObtained = obtainedTotal;
     student.grandTotalMax = maxTotal;
     student.grandTotalGrade = gradeForMarks(obtainedTotal, maxTotal);
+    student.missingFields = missingFields;
 
     students.push(student);
   }

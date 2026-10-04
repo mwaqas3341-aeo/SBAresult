@@ -8,87 +8,127 @@
 </head>
 <body>
   <header class="topbar">
-    <div class="wrap">
-      <span class="badge">SBA</span>
-      <h1>Result Card Generator</h1>
+    <div class="wrap topbar-row">
+      <div class="topbar-left">
+        <span class="badge">SBA</span>
+        <h1>Result Card Generator</h1>
+      </div>
+      <div class="topbar-right" id="topbar-account" hidden>
+        <span id="topbar-email"></span>
+        <a href="#" id="nav-signout">Sign out</a>
+      </div>
     </div>
   </header>
 
   <main class="wrap">
-    <section class="card" id="account-card">
-      <div id="account-logged-out">
-        <h2>Account</h2>
-        <p class="muted">Sign in to generate result cards, save your school's details, and keep a history of past generations.</p>
+
+    <!-- ============== LOGGED OUT: auth card ============== -->
+    <section class="card" id="view-auth">
+      <div class="auth-tabs">
+        <button class="auth-tab active" data-tab="signin">Sign In</button>
+        <button class="auth-tab" data-tab="signup">Register</button>
+        <button class="auth-tab" data-tab="forgot">Forgot Password</button>
+      </div>
+
+      <div id="tab-signin" class="auth-panel">
+        <h2>Sign In</h2>
         <div class="account-form">
-          <input type="email" id="auth-email" placeholder="Email" autocomplete="email">
-          <input type="password" id="auth-password" placeholder="Password" autocomplete="current-password">
-          <div class="account-btn-row">
-            <button id="auth-signin-btn" class="btn btn-secondary">Sign In</button>
-            <button id="auth-signup-btn" class="btn btn-secondary">Sign Up</button>
-          </div>
-          <div id="auth-status" class="status" hidden></div>
+          <input type="email" id="signin-email" placeholder="Email" autocomplete="email">
+          <input type="password" id="signin-password" placeholder="Password" autocomplete="current-password">
+          <button id="signin-btn" class="btn">Sign In</button>
+          <div id="signin-status" class="status" hidden></div>
         </div>
       </div>
 
-      <div id="account-logged-in" hidden>
-        <h2>Account</h2>
-        <p class="muted">Signed in as <strong id="account-email"></strong>. <a href="#" id="auth-signout-btn">Sign out</a></p>
-
+      <div id="tab-signup" class="auth-panel" hidden>
+        <h2>Register</h2>
         <div class="account-form">
-          <label class="field-label">School Name (used when saving settings, not on the card)</label>
-          <input type="text" id="profile-school" placeholder="School name">
-          <label class="field-label">District (shown on every generated card)</label>
-          <input type="text" id="profile-district" placeholder="District">
-          <button id="profile-save-btn" class="btn btn-secondary">Save Settings</button>
+          <label class="field-label">School Name</label>
+          <input type="text" id="signup-school" placeholder="School name">
+          <label class="field-label">EMIS Code / Registration No.</label>
+          <input type="text" id="signup-emis" placeholder="EMIS code or registration number">
+          <label class="field-label">Email</label>
+          <input type="email" id="signup-email" placeholder="Email" autocomplete="email">
+          <label class="field-label">Password</label>
+          <input type="password" id="signup-password" placeholder="Password" autocomplete="new-password">
+          <label class="field-label">Confirm Password</label>
+          <input type="password" id="signup-password-confirm" placeholder="Confirm password" autocomplete="new-password">
+          <button id="signup-btn" class="btn">Register</button>
+          <div id="signup-status" class="status" hidden></div>
+          <p class="muted">New accounts start with the <strong>Free</strong> package: 5 result card credits, no admin action needed.</p>
+        </div>
+      </div>
+
+      <div id="tab-forgot" class="auth-panel" hidden>
+        <h2>Reset Password</h2>
+        <div class="account-form">
+          <input type="email" id="forgot-email" placeholder="Email" autocomplete="email">
+          <button id="forgot-btn" class="btn">Send Reset Link</button>
+          <div id="forgot-status" class="status" hidden></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============== USER DASHBOARD (hidden for admin accounts) ============== -->
+    <div id="view-user" hidden>
+
+      <section class="card">
+        <h2>Dashboard</h2>
+        <div class="dash-grid">
+          <div class="dash-item"><span class="dash-label">School</span><span class="dash-value" id="dash-school">&ndash;</span></div>
+          <div class="dash-item"><span class="dash-label">EMIS / Registration No.</span><span class="dash-value" id="dash-emis">&ndash;</span></div>
+          <div class="dash-item"><span class="dash-label">Package</span><span class="dash-value" id="dash-package">&ndash;</span></div>
+          <div class="dash-item"><span class="dash-label">Account Type</span><span class="dash-value" id="dash-account-type">&ndash;</span></div>
+        </div>
+        <div class="credit-banner">
+          <div><span class="credit-number" id="dash-remaining">0</span><span class="credit-caption">Remaining</span></div>
+          <div><span class="credit-number-sm" id="dash-total">0</span><span class="credit-caption">Total</span></div>
+          <div><span class="credit-number-sm" id="dash-used">0</span><span class="credit-caption">Used</span></div>
+        </div>
+        <p class="muted">Need more result card credits? Contact the administrator to add a package.</p>
+      </section>
+
+      <section class="card">
+        <h2>Profile</h2>
+        <div class="account-form">
+          <label class="field-label">School Name</label>
+          <input type="text" id="profile-school">
+          <label class="field-label">District (printed on the card)</label>
+          <input type="text" id="profile-district">
+          <label class="field-label">EMIS Code / Registration No.</label>
+          <input type="text" id="profile-emis">
+          <button id="profile-save-btn" class="btn btn-secondary">Save Profile</button>
           <div id="profile-status" class="status" hidden></div>
         </div>
+        <details class="password-details">
+          <summary>Change password</summary>
+          <div class="account-form">
+            <input type="password" id="new-password" placeholder="New password" autocomplete="new-password">
+            <button id="change-password-btn" class="btn btn-secondary">Update Password</button>
+            <div id="password-status" class="status" hidden></div>
+          </div>
+        </details>
+      </section>
 
-        <h3 class="history-heading">Recent generations</h3>
-        <div class="table-scroll">
-          <table class="ref-table" id="history-table">
-            <thead><tr><th>When</th><th>Students</th><th>Class</th><th>Section</th><th>File</th></tr></thead>
-            <tbody id="history-body"><tr><td colspan="5" class="muted">No generations yet.</td></tr></tbody>
-          </table>
-        </div>
-      </div>
-    </section>
-
-    <section class="card" id="admin-card" hidden>
-      <h2>Admin Panel</h2>
-      <p class="muted">Visible only to the admin account. Shows every registered school and the most recent generations across all accounts.</p>
-
-      <h3 class="history-heading">Registered schools</h3>
-      <div class="table-scroll">
-        <table class="ref-table" id="admin-profiles-table">
-          <thead><tr><th>Email</th><th>School Name</th><th>District</th><th>Joined</th></tr></thead>
-          <tbody id="admin-profiles-body"><tr><td colspan="4" class="muted">Loading&hellip;</td></tr></tbody>
-        </table>
-      </div>
-
-      <h3 class="history-heading">All generations</h3>
-      <div class="table-scroll">
-        <table class="ref-table" id="admin-history-table">
-          <thead><tr><th>When</th><th>Students</th><th>Class</th><th>Section</th><th>File</th></tr></thead>
-          <tbody id="admin-history-body"><tr><td colspan="5" class="muted">Loading&hellip;</td></tr></tbody>
-        </table>
-      </div>
-    </section>
-
-    <div id="app-content" hidden>
       <section class="card">
-        <h2>Upload the Log Sheet</h2>
-        <p class="muted">
+        <h2>Create Result Cards</h2>
+
+        <div class="account-form">
+          <label class="field-label">Result Card Heading</label>
+          <input type="text" id="builder-heading" value="REPORT CARD SCHOOL BASED ASSESSMENT (SBA)">
+          <label class="field-label">Year (printed on the card)</label>
+          <input type="text" id="builder-year" placeholder="e.g. 2026">
+        </div>
+
+        <p class="muted" style="margin-top:16px">
           Everything runs in your browser &mdash; nothing is uploaded to any
           server. Choose a <strong>.xlsx</strong> or <strong>.xlsm</strong> file
-          with a <strong>Log Sheet</strong> (one row per student). A result
-          card PDF is generated per student: a single PDF if there's one, or a
-          ZIP file (sorted into Class / Section folders) for several.
+          with a <strong>Log Sheet</strong> (one row per student). School Name
+          on every card comes from your profile above, not the spreadsheet.
         </p>
-
         <p class="muted">
           Don't have a Log Sheet yet?
           <a class="download-link" href="templates/Log_Sheet_Template.xlsx" download>Download a blank template &#8595;</a>
-          (correct column headers already in place, plus an Instructions tab)
         </p>
 
         <div class="upload-form">
@@ -96,11 +136,31 @@
             <input id="file-input" type="file" accept=".xlsx,.xlsm">
             <span class="dz-text" id="dz-text">Click to choose a file, or drag it here</span>
           </label>
-          <button id="generate-btn" class="btn" disabled>Generate Result Card(s)</button>
+          <button id="generate-btn" class="btn" disabled>Review &amp; Generate</button>
           <div id="status" class="status" hidden></div>
           <div id="progress-wrap" class="progress-wrap" hidden>
             <div id="progress-bar" class="progress-bar"></div>
           </div>
+        </div>
+      </section>
+
+      <section class="card">
+        <h2>Generation History</h2>
+        <div class="table-scroll">
+          <table class="ref-table" id="history-table">
+            <thead><tr><th>When</th><th>Year</th><th>Heading</th><th>Cards</th><th>Class</th><th>Section</th></tr></thead>
+            <tbody id="history-body"><tr><td colspan="6" class="muted">No generations yet.</td></tr></tbody>
+          </table>
+        </div>
+      </section>
+
+      <section class="card">
+        <h2>Payment History</h2>
+        <div class="table-scroll">
+          <table class="ref-table" id="payments-table">
+            <thead><tr><th>Date</th><th>Package</th><th>Amount</th><th>Credits</th><th>Status</th></tr></thead>
+            <tbody id="payments-body"><tr><td colspan="5" class="muted">No payments yet.</td></tr></tbody>
+          </table>
         </div>
       </section>
 
@@ -137,11 +197,124 @@
         </table>
       </section>
     </div>
+
+    <!-- ============== ADMIN DASHBOARD (completely separate from the user view) ============== -->
+    <div id="view-admin" hidden>
+      <section class="card">
+        <h2>Admin Dashboard</h2>
+        <div class="stat-grid" id="admin-stats">
+          <div class="stat-card"><span class="stat-value" id="stat-total-users">0</span><span class="stat-label">Total Users</span></div>
+          <div class="stat-card"><span class="stat-value" id="stat-free-users">0</span><span class="stat-label">Free Users</span></div>
+          <div class="stat-card"><span class="stat-value" id="stat-paid-users">0</span><span class="stat-label">Paid Users</span></div>
+          <div class="stat-card"><span class="stat-value" id="stat-total-generated">0</span><span class="stat-label">Cards Generated</span></div>
+          <div class="stat-card"><span class="stat-value" id="stat-total-allocated">0</span><span class="stat-label">Credits Allocated</span></div>
+          <div class="stat-card"><span class="stat-value" id="stat-total-used">0</span><span class="stat-label">Credits Used</span></div>
+          <div class="stat-card"><span class="stat-value" id="stat-total-remaining">0</span><span class="stat-label">Credits Remaining</span></div>
+          <div class="stat-card"><span class="stat-value" id="stat-zero-credit">0</span><span class="stat-label">Zero-Credit Users</span></div>
+          <div class="stat-card"><span class="stat-value" id="stat-low-credit">0</span><span class="stat-label">Low-Credit Users (&le;5)</span></div>
+        </div>
+      </section>
+
+      <section class="card">
+        <h2>Users</h2>
+        <div class="filter-bar">
+          <input type="text" id="admin-search" placeholder="Search school, email, EMIS&hellip;">
+          <select id="admin-filter">
+            <option value="all">All</option>
+            <option value="free">Free</option>
+            <option value="paid">Paid</option>
+            <option value="zero">Zero Credits</option>
+            <option value="remaining">Has Credits Remaining</option>
+          </select>
+        </div>
+        <div class="table-scroll">
+          <table class="ref-table" id="admin-users-table">
+            <thead>
+              <tr>
+                <th>School</th><th>Email</th><th>EMIS/Reg No.</th><th>Type</th><th>Package</th>
+                <th>Total</th><th>Used</th><th>Remaining</th><th>Joined</th><th></th>
+              </tr>
+            </thead>
+            <tbody id="admin-users-body"><tr><td colspan="10" class="muted">Loading&hellip;</td></tr></tbody>
+          </table>
+        </div>
+      </section>
+
+      <section class="card" id="admin-detail-card" hidden>
+        <h2>User Detail</h2>
+        <div class="dash-grid" id="admin-detail-grid"></div>
+
+        <div class="account-form admin-package-form">
+          <label class="field-label">Add Package</label>
+          <select id="admin-package-select"></select>
+          <input type="hidden" id="admin-detail-user-id">
+          <input type="text" id="admin-package-notes" placeholder="Notes (optional)">
+          <button id="admin-package-confirm-btn" class="btn btn-secondary">Record Payment &amp; Add Credits</button>
+          <div id="admin-package-status" class="status" hidden></div>
+        </div>
+
+        <h3 class="history-heading">Payment History</h3>
+        <div class="table-scroll">
+          <table class="ref-table" id="admin-detail-payments">
+            <thead><tr><th>Date</th><th>Package</th><th>Amount</th><th>Credits</th></tr></thead>
+            <tbody></tbody>
+          </table>
+        </div>
+
+        <h3 class="history-heading">Generation History</h3>
+        <div class="table-scroll">
+          <table class="ref-table" id="admin-detail-history">
+            <thead><tr><th>Date</th><th>Year</th><th>Heading</th><th>Cards</th></tr></thead>
+            <tbody></tbody>
+          </table>
+        </div>
+      </section>
+    </div>
   </main>
 
   <footer class="wrap footer">
     <p>School Based Assessment &mdash; runs entirely in your browser, hosted free on GitHub Pages.</p>
   </footer>
+
+  <!-- ============== Modals ============== -->
+  <div class="modal-overlay" id="modal-missing" hidden>
+    <div class="modal-box">
+      <h2>Some information is missing</h2>
+      <p class="muted">Review the affected students below before continuing.</p>
+      <div class="table-scroll modal-table-scroll">
+        <table class="ref-table">
+          <thead><tr><th>Student</th><th>Missing Information</th></tr></thead>
+          <tbody id="missing-info-body"></tbody>
+        </table>
+      </div>
+      <p class="warning-text">Warning: if you continue, the affected fields will remain blank (marks will count as 0 in grade calculations). Do you want to continue?</p>
+      <div class="modal-btn-row">
+        <button class="btn btn-secondary" id="missing-go-back-btn">Go Back &amp; Correct</button>
+        <button class="btn" id="missing-continue-btn">Continue &amp; Generate</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="modal-overlay" id="modal-review" hidden>
+    <div class="modal-box">
+      <h2>Review Before Generating</h2>
+      <div class="review-grid">
+        <div><span class="dash-label">School</span><span class="dash-value" id="review-school"></span></div>
+        <div><span class="dash-label">EMIS/Registration No.</span><span class="dash-value" id="review-emis"></span></div>
+        <div><span class="dash-label">Heading</span><span class="dash-value" id="review-heading"></span></div>
+        <div><span class="dash-label">Year</span><span class="dash-value" id="review-year"></span></div>
+        <div><span class="dash-label">Cards to Generate</span><span class="dash-value" id="review-count"></span></div>
+        <div><span class="dash-label">Available Credits</span><span class="dash-value" id="review-available"></span></div>
+        <div><span class="dash-label">Remaining After</span><span class="dash-value" id="review-after"></span></div>
+        <div><span class="dash-label">Missing Information</span><span class="dash-value" id="review-missing"></span></div>
+      </div>
+      <div id="review-insufficient" class="status error" hidden>You do not have enough result-card generations remaining. Please contact the administrator to purchase/add another package.</div>
+      <div class="modal-btn-row">
+        <button class="btn btn-secondary" id="review-cancel-btn">Cancel</button>
+        <button class="btn" id="review-confirm-btn">Confirm &amp; Generate</button>
+      </div>
+    </div>
+  </div>
 
   <!-- Off-screen render target: one card is built here per student, then rasterized to PDF -->
   <div id="render-root" aria-hidden="true"></div>
@@ -149,7 +322,7 @@
     <div class="rc-card">
       <div class="rc-banner">
         <img src="assets/header-banner.jpg" alt="">
-        <h1 class="rc-title">REPORT CARD SCHOOL BASED ASSESSMENT (SBA) 2025</h1>
+        <h1 class="rc-title" data-field="heading">REPORT CARD SCHOOL BASED ASSESSMENT (SBA)</h1>
       </div>
 
       <table class="rc-info">
@@ -262,10 +435,10 @@
   <script src="js/vendor/jspdf.umd.min.js"></script>
   <script src="js/vendor/supabase.min.js"></script>
   <script src="js/auth.js"></script>
-  <script src="js/account.js"></script>
   <script src="js/grading.js"></script>
   <script src="js/parse.js"></script>
   <script src="js/render.js"></script>
+  <script src="js/account.js"></script>
   <script src="js/app.js"></script>
 </body>
 </html>
